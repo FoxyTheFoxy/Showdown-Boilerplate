@@ -41,16 +41,14 @@ exports.loginserverpublickey = "-----BEGIN RSA PUBLIC KEY-----\n" +
 	"-----END RSA PUBLIC KEY-----\n";
 
 // crashguardemail - if the server has been running for more than an hour
-// and crashes, send an email using these settings, rather than locking down
-// the server. Uncomment this definition if you want to use this feature;
-// otherwise, all crashes will lock down the server.
+//   and crashes, send an email using these settings, rather than locking down
+//   the server. Uncomment this definition if you want to use this feature;
+//   otherwise, all crashes will lock down the server.
 /**exports.crashguardemail = {
-	transport: 'SMTP',
 	options: {
 		host: 'mail.example.com',
 		port: 465,
-		secureConnection: true,
-		maxConnections: 1,
+		secure: true,
 		auth: {
 			user: 'example@domain.com',
 			pass: 'password'
@@ -64,14 +62,27 @@ exports.loginserverpublickey = "-----BEGIN RSA PUBLIC KEY-----\n" +
 // report joins and leaves - shows messages like "<USERNAME> joined"
 //   Join and leave messages are small and consolidated, so there will never
 //   be more than one line of messages.
+//   If this setting is set to `true`, it will override the client-side
+//   /hidejoins configuration for users.
 //   This feature can lag larger servers - turn this off if your server is
 //   getting more than 80 or so users.
-exports.reportjoins = false;
+exports.reportjoins = true;
+
+// report joins and leaves periodically - sends silent join and leave messages in batches
+//   This setting will only be effective if `reportjoins` is set to false, and users will
+//   only be able to see the messages if they have the /showjoins client-side setting enabled.
+//   Set this to a positive amount of milliseconds if you want to enable this feature.
+exports.reportjoinsperiod = 0;
 
 // report battles - shows messages like "OU battle started" in the lobby
 //   This feature can lag larger servers - turn this off if your server is
 //   getting more than 160 or so users.
-exports.reportbattles = false;
+exports.reportbattles = true;
+
+// report joins and leaves in battle - shows messages like "<USERNAME> joined" in battle
+//   Set this to false on large tournament servers where battles get a lot of joins and leaves.
+//   Note that the feature of turning this off is deprecated.
+exports.reportbattlejoins = true;
 
 // moderated chat - prevent unvoiced users from speaking
 //   This should only be enabled in special situations, such as temporarily
@@ -79,6 +90,11 @@ exports.reportbattles = false;
 exports.chatmodchat = false;
 exports.battlemodchat = false;
 exports.pmmodchat = false;
+
+// forced timer - force the timer on for all battles
+//   Players will be unable to turn it off.
+//   This setting can also be turned on with the command /forcetimer.
+exports.forcetimer = false;
 
 // backdoor - allows Pokemon Showdown system operators to provide technical
 //            support for your server
@@ -90,13 +106,13 @@ exports.pmmodchat = false;
 //   disable this feature.
 exports.backdoor = true;
 
-// List of IPs from which the dev console (>> and >>>) can be used.
+// List of IPs and user IDs with dev console (>> and >>>) access.
 // The console is incredibly powerful because it allows the execution of
 // arbitrary commands on the local computer (as the user running the
 // server). If an account with the console permission were compromised,
 // it could possibly be used to take over the server computer. As such,
-// you should only specify a small range of trusted IPs here, or none
-// at all. By default, only localhost can use the dev console.
+// you should only specify a small range of trusted IPs and users here,
+// or none at all. By default, only localhost can use the dev console.
 // In addition to connecting from a valid IP, a user must *also* have
 // the `console` permission in order to use the dev console.
 // Setting this to an empty array ([]) will disable the dev console.
@@ -110,6 +126,9 @@ exports.watchconfig = true;
 
 // logchat - whether to log chat rooms.
 exports.logchat = false;
+
+// logchallenges - whether to log challenge battles. Useful for tournament servers.
+exports.logchallenges = false;
 
 // loguserstats - how often (in milliseconds) to write user stats to the
 // lobby log. This has no effect if `logchat` is disabled.
@@ -137,7 +156,7 @@ exports.herokuhack = false;
 //
 // Your server *must* be registered in order for your custom avatars to be
 // displayed in the client.
-exports.customAvatars = {
+exports.customavatars = {
 	//'userid': 'customavatar.png'
 };
 
@@ -145,6 +164,11 @@ exports.customAvatars = {
 // disciplinary actions on your section. You can also leave this blank, in
 // which case users won't be given any information on how to appeal.
 exports.appealurl = '';
+
+// replsocketprefix - the prefix for the repl sockets to be listening on
+// replsocketmode - the file mode bits to use for the repl sockets
+exports.replsocketprefix = './logs/repl/';
+exports.replsocketmode = 0600;
 
 // permissions and groups:
 //   Each entry in `groupsranking' specifies the ranking of the groups.
@@ -242,7 +266,6 @@ exports.groups = {
 		roomvoice: true,
 		forcerename: true,
 		ip: true,
-		tournamentsmoderation: true,
 		alts: '@u',
 		tournaments: true,
 		rank: 3
@@ -264,6 +287,7 @@ exports.groups = {
 		bypassblocks: 'u%@&~',
 		receiveauthmessages: true,
 		tournamentsmoderation: true,
+		jeopardy: true,
 		rank: 2
 	},
 	'+': {
@@ -272,7 +296,6 @@ exports.groups = {
 		inherit: ' ',
 		broadcast: true,
 		joinbattle: true,
-		tournaments: true,
 		rank: 1
 	},
 	' ': {
